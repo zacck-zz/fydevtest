@@ -1,7 +1,10 @@
 package com.zacck.fydevtest;
 
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -82,13 +85,6 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 			//get the string resources so we can use all this stuff
 			Resources mRes = getResources();
 			//lets make a timestamp
-			// create a java calendar instance
-			Calendar calendar = Calendar.getInstance(); 
-			//get a java.util.Date from the calendar instance.
-			//this date will represent the current instant, or "now".
-			java.util.Date now = calendar.getTime(); 
-			//a java current time (now) instance
-			java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
 			
 			String backFromServer = "";
 			
@@ -96,7 +92,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 			//lets create a http client and use it to do a post  to get some results 
 			// Create a new HttpClient and Post Header
 		    HttpClient httpclient = new DefaultHttpClient();
-		    HttpPost httppost = new HttpPost("http://api.sponsorpay.com/feed/v1/offers.json");
+		    HttpPost httppost = new HttpPost("http://api.sponsorpay.com/feed/v1/offers.json?");
 
 		    try {
 		        // Add your data to send to the api
@@ -105,14 +101,16 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 		        nameValuePairs.add(new BasicNameValuePair("uid", etUid.getText().toString()));
 		        nameValuePairs.add(new BasicNameValuePair("locale", mRes.getString(R.string.locale)));
 		        nameValuePairs.add(new BasicNameValuePair("os_version", android.os.Build.VERSION.RELEASE));
-		        nameValuePairs.add(new BasicNameValuePair("timestamp", currentTimestamp.toString()));
-		        nameValuePairs.add(new BasicNameValuePair("hashkey", etAkey.getText().toString()));
+		        nameValuePairs.add(new BasicNameValuePair("timestamp", System.currentTimeMillis()+""));
 		        nameValuePairs.add(new BasicNameValuePair("offer_types", mRes.getString(R.string.offer_types)));
 		        nameValuePairs.add(new BasicNameValuePair("pub0", mRes.getString(R.string.pubo)));		        
+		        String t = genHash(nameValuePairs);
+		        nameValuePairs.add(new BasicNameValuePair("hashkey", t));
 		        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
 		        // Execute HTTP Post Request
+		        Log.d(TAG, httppost.toString());
 		        HttpResponse response = httpclient.execute(httppost);
+		        Log.d(TAG, "Status is "+response.getStatusLine().getStatusCode());
 		        backFromServer = EntityUtils.toString(response.getEntity());
 		        Log.d(TAG, backFromServer);
 		        
@@ -123,11 +121,54 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 			return null;
 		}
 		
+		
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
 		}
+	}
+	
+	private String genHash(List<NameValuePair> nameValuePairs) {
+		String mhash = "";
+		Comparator<NameValuePair> comp = new Comparator<NameValuePair>() {        // solution than making method synchronized
+		    @Override
+		    public int compare(NameValuePair p1, NameValuePair p2) {
+		      return p1.getName().compareTo(p2.getName());
+		    }
+		};
+
+		Collections.sort(nameValuePairs, comp);
+		for(int i = 0; i<nameValuePairs.size();i++)
+		{
+			mhash += nameValuePairs.get(i).getName()+"="+nameValuePairs.get(i).getValue()+"&";
+			Log.d(TAG, mhash);
+		}
+		
+		mhash = mhash+getResources().getString(R.string.key);
+		try
+		{
+		MessageDigest md = MessageDigest.getInstance("SHA-1");
+        md.update(mhash.getBytes());
+ 
+        byte byteData[] = md.digest();
+ 
+        //convert the byte to hex format method 1
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < byteData.length; i++) {
+         sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+        }
+ 
+        mhash = sb.toString();
+		}
+		catch(Exception e )
+		{
+			
+		}
+		return mhash;
 		
 	}
+
+	
+	
    
 }
