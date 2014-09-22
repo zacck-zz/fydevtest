@@ -3,6 +3,9 @@
     package="com.zacck.fydevtest"
     android:versionCode="1"
     android:versionName="1.0" >
+    
+    <!-- lets add this permission so we can use the internet -->
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <uses-sdk
         android:minSdkVersion="8"
