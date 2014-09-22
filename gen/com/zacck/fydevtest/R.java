@@ -1248,11 +1248,13 @@ containing a value of this type.
         public static final int action_settings=0x7f0a000f;
         public static final int app_name=0x7f0a000d;
         public static final int appid=0x7f0a0010;
+        public static final int baseurl_json=0x7f0a0017;
         public static final int bttext=0x7f0a0016;
         public static final int hello_world=0x7f0a000e;
         public static final int ip=0x7f0a0013;
         public static final int key=0x7f0a0014;
         public static final int locale=0x7f0a0012;
+        public static final int offer_types=0x7f0a0018;
         public static final int pubo=0x7f0a0015;
         public static final int uid=0x7f0a0011;
     }

@@ -346,11 +346,13 @@ int string abc_shareactionprovider_share_with_application 0x7f0a000b
 int string action_settings 0x7f0a000f
 int string app_name 0x7f0a000d
 int string appid 0x7f0a0010
+int string baseurl_json 0x7f0a0017
 int string bttext 0x7f0a0016
 int string hello_world 0x7f0a000e
 int string ip 0x7f0a0013
 int string key 0x7f0a0014
 int string locale 0x7f0a0012
+int string offer_types 0x7f0a0018
 int string pubo 0x7f0a0015
 int string uid 0x7f0a0011
 int style AppBaseTheme 0x7f0b008b

@@ -1,8 +1,23 @@
 package com.zacck.fydevtest;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
 import android.support.v7.app.ActionBarActivity;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +29,7 @@ import android.widget.EditText;
 public class MainActivity extends ActionBarActivity implements OnClickListener {
 	EditText etUid,etAkey,etAppid,etPub0;
 	Button btReq;
+	String TAG = "fydevtestMainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +59,9 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 		switch(v.getId())
 		{
 		case R.id.btRequest:
-			
+			//lets run our thread here 
+			MakeRequest mr = new MakeRequest();
+			mr.execute();
 			break;
 		}
 		
@@ -61,6 +79,47 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			//get the string resources so we can use all this stuff
+			Resources mRes = getResources();
+			//lets make a timestamp
+			// create a java calendar instance
+			Calendar calendar = Calendar.getInstance(); 
+			//get a java.util.Date from the calendar instance.
+			//this date will represent the current instant, or "now".
+			java.util.Date now = calendar.getTime(); 
+			//a java current time (now) instance
+			java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+			
+			String backFromServer = "";
+			
+			
+			//lets create a http client and use it to do a post  to get some results 
+			// Create a new HttpClient and Post Header
+		    HttpClient httpclient = new DefaultHttpClient();
+		    HttpPost httppost = new HttpPost("http://api.sponsorpay.com/feed/v1/offers.json");
+
+		    try {
+		        // Add your data to send to the api
+		        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+		        nameValuePairs.add(new BasicNameValuePair("appid", etAppid.getText().toString()));
+		        nameValuePairs.add(new BasicNameValuePair("uid", etUid.getText().toString()));
+		        nameValuePairs.add(new BasicNameValuePair("locale", mRes.getString(R.string.locale)));
+		        nameValuePairs.add(new BasicNameValuePair("os_version", android.os.Build.VERSION.RELEASE));
+		        nameValuePairs.add(new BasicNameValuePair("timestamp", currentTimestamp.toString()));
+		        nameValuePairs.add(new BasicNameValuePair("hashkey", etAkey.getText().toString()));
+		        nameValuePairs.add(new BasicNameValuePair("offer_types", mRes.getString(R.string.offer_types)));
+		        nameValuePairs.add(new BasicNameValuePair("pub0", mRes.getString(R.string.pubo)));		        
+		        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+		        // Execute HTTP Post Request
+		        HttpResponse response = httpclient.execute(httppost);
+		        backFromServer = EntityUtils.toString(response.getEntity());
+		        Log.d(TAG, backFromServer);
+		        
+		    } catch (Exception e) {
+		    	//log an exception if we find one 
+		    	Log.d(TAG, e.toString());
+		    }
 			return null;
 		}
 		
