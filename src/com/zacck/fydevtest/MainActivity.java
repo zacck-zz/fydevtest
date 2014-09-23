@@ -1,5 +1,6 @@
 package com.zacck.fydevtest;
 
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -105,7 +106,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 			// Create a new HttpClient and Post Header
 			HttpClient httpclient = new DefaultHttpClient();
 			HttpPost httppost = new HttpPost(
-					"http://api.sponsorpay.com/feed/v1/offers.json?");
+					"http://api.sponsorpay.com/feed/v1/offers.json");
 
 			try {
 				// Add your data to send to the api
@@ -158,11 +159,16 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 		mYHash = hashRes.getString(R.string.key);
 		mhash += mYHash;
 		Log.d("conc string", mhash);
+		
 		try {
+			//convert mhash to hex
+			byte[] bytes = mhash.getBytes("UTF-8");
+			BigInteger bigInt = new BigInteger(bytes);
+			String hexString = bigInt.toString(16);
 			Log.d("running md on", mhash);
 
 			MessageDigest md = MessageDigest.getInstance("SHA-1");
-			md.update(mhash.getBytes());
+			md.update(hexString.getBytes());
 
 			byte byteData[] = md.digest();
 
